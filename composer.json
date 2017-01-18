@@ -1,0 +1,25 @@
+{
+  "name": "unisharp/laravel-loggable",
+  "description": "it can generate entities by arca principle",
+  "type": "library",
+  "keywords": ["data", "api", "laravel"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name":  "UniSharp Ltd.",
+      "homepage": "http://www.unisharp.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "illuminate/support": ">=5.0.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "Unisharp\\Loggable\\": "src/"
+    }
+  }
+}
