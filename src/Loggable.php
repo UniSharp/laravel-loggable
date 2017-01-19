@@ -30,9 +30,25 @@ class Loggable
         }
     }
 
-    private function writeLog($log_message)
+    /*********************
+     **    log types    **
+     *********************/
+
+    private function writeDetailLogWithMessage($msg, $with_input = null)
     {
-        \Log::debug($log_message);
+        $user_trace = $this->getUserTrace();
+
+        if ($with_input) {
+            $user_trace[$msg] = request()->input();
+        } else {
+            array_push($user_trace, $msg);
+        }
+
+        $this->writeLog(json_encode([
+            'user_id' => $this->getUserIdToDisplay(),
+            'ip' => \Request::getClientIp(),
+            'action_trace' => (object)$user_trace
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
     }
 
     private function writeSimpleLog($message = null)
@@ -55,38 +71,14 @@ class Loggable
         $this->writeLog($full_message);
     }
 
-    private function exceptionIsFormRequest()
+    private function writeLog($log_message)
     {
-        return $this->e instanceof HttpResponseException && str_contains($this->e->getFile(), 'FormRequest');
+        \Log::debug($log_message);
     }
 
-    private function getUserIdToDisplay()
-    {
-        if (\Auth::check()) {
-            $user_id = auth()->id();
-        } else {
-            $user_id = 'null';
-        }
-
-        return $user_id;
-    }
-
-    private function writeDetailLogWithMessage($msg, $with_input = null)
-    {
-        $user_trace = $this->getUserTrace();
-
-        if ($with_input) {
-            $user_trace[$msg] = request()->input();
-        } else {
-            array_push($user_trace, $msg);
-        }
-
-        $this->writeLog(json_encode([
-            'user_id' => $this->getUserIdToDisplay(),
-            'ip' => \Request::getClientIp(),
-            'action_trace' => (object)$user_trace
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-    }
+    /**********************
+     **  trace handling  **
+     **********************/
 
     public function getUserTrace()
     {
@@ -116,6 +108,49 @@ class Loggable
         return $arr_logs;
     }
 
+    public function setUserTrace()
+    {
+        $max_trace_count = 6;
+        $user_trace = session($this->traceSessionKey()) ?: [];
+
+        array_push($user_trace, [
+            'action' => \Route::currentRouteAction(),
+            'is_ajax' => \Request::ajax(),
+            'url' => \Request::fullUrl()
+        ]);
+
+        if (count($user_trace) > $max_trace_count) {
+            $user_trace = array_slice($user_trace, -$max_trace_count);
+        }
+
+        session([$this->traceSessionKey() => $user_trace]);
+    }
+
+    private function traceSessionKey()
+    {
+        return 'loggable.user.' . $this->getUserIdToDisplay() . '.' . str_replace('.', '_', \Request::getClientIp());
+    }
+
+    /*********************
+     **  miscellaneous  **
+     *********************/
+
+    private function exceptionIsFormRequest()
+    {
+        return $this->e instanceof HttpResponseException && str_contains($this->e->getFile(), 'FormRequest');
+    }
+
+    private function getUserIdToDisplay()
+    {
+        if (\Auth::check()) {
+            $user_id = auth()->id();
+        } else {
+            $user_id = 'null';
+        }
+
+        return $user_id;
+    }
+
     private function getMaxStrLength($user_trace, $key)
     {
         $max_str_length = 0;
@@ -138,28 +173,5 @@ class Loggable
         } else {
             return ['null', 'null'];
         }
-    }
-
-    private function traceSessionKey()
-    {
-        return 'loggable.user.' . auth()->id() . '.' . str_replace('.', '_', \Request::getClientIp());
-    }
-
-    public function setUserTrace()
-    {
-        $max_trace_count = 6;
-        $user_trace = session($this->traceSessionKey()) ?: [];
-
-        array_push($user_trace, [
-            'action' => \Route::currentRouteAction(),
-            'is_ajax' => \Request::ajax(),
-            'url' => \Request::fullUrl()
-        ]);
-
-        if (count($user_trace) > $max_trace_count) {
-            $user_trace = array_slice($user_trace, -$max_trace_count);
-        }
-
-        session([$this->traceSessionKey() => $user_trace]);
     }
 }
