@@ -5,6 +5,7 @@ namespace Unisharp\Loggable;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class Loggable
@@ -24,6 +25,8 @@ class Loggable
             $this->writeSimpleLog('Model not found.');
         } elseif ($e instanceof NotFoundHttpException) {
             $this->writeSimpleLog('404 not found.');
+        } elseif ($e instanceof HttpException) {
+            $this->writeSimpleLog();
         } else {
             $this->writeSimpleLog();
             \Log::error($e);
@@ -62,7 +65,7 @@ class Loggable
         }
 
         $full_message = implode(' | ', [
-            $message ?: $status_code,
+            $message ?: 'Status : ' . $status_code,
             '(' . \Request::method() . ') ' . \Request::fullUrl(),
             'User ID : ' . $this->getUserIdToDisplay(),
             'IP: ' . \Request::getClientIp()
