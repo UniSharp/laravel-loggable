@@ -17,7 +17,6 @@ class LoggableServiceProvider extends ServiceProvider
      */
     public function boot(\Illuminate\Routing\Router $router)
     {
-        $this->setupFacades();
         $this->setupMiddlewares($router);
     }
 
@@ -51,7 +50,7 @@ class LoggableServiceProvider extends ServiceProvider
      */
     public function register()
     {
-
+        $this->setupFacades();
     }
 
     /**
