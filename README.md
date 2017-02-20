@@ -40,7 +40,7 @@ This package formats exceptions before they are written to `laravel.log`.
 	404 not found. | (GET) http://your-domain/js/jquery.min.map | User ID : null | IP: 127.0.0.1
 	```
 	```
-	Model not found. | (GET) http://prjl51-cango.app/pickup/test | User ID : 6 | IP: 127.0.0.1
+	Model not found. | (GET) http://your-domain/pickup/test | User ID : 6 | IP: 127.0.0.1
 	```
 	
  * Detail log with trace and input
