@@ -1,7 +1,7 @@
-#Laravel Log Writer
+# Laravel Log Writer
 This package formats exceptions before they are written to `laravel.log`.
 
-##Installation
+## Installation
 1. Install via composer
 
 	```
@@ -33,7 +33,7 @@ This package formats exceptions before they are written to `laravel.log`.
 	}
 	```
 
-##Log display types
+## Log display types
  * Simple log
 	
 	```
@@ -67,7 +67,7 @@ This package formats exceptions before they are written to `laravel.log`.
 	}  
 	```
 	
-##Handled exceptions
+## Handled exceptions
 
  * Detail log :
   * Form request error
